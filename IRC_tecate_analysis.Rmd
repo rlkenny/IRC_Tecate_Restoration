@@ -1,0 +1,577 @@
+---
+title: "IRC_tecate_analysis"
+author: "Rachel Kenny"
+date: "8/31/2020"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Load packages & data
+```{r}
+
+library(tidyverse)
+library(here)
+library(readxl)
+library(janitor)
+
+# Tecate data
+ph1 <- read_excel(here("data", "Phase1_data.xlsx")) %>% 
+  clean_names()
+
+ph2 <- read_excel(here("data", "Phase2_data.xlsx")) %>% 
+  clean_names()
+
+ph3 <- read_excel(here("data", "Phase3_data.xlsx")) %>% 
+  clean_names()
+
+# Soil data
+soil1 <- read_excel(here("data", "Tecate_PhaseI_Topo1m_soil.xlsx")) %>% 
+  clean_names()
+
+soil2 <- read_excel(here("data", "Tecate_PhaseII_Topo1m_Soil.xlsx")) %>% 
+  clean_names()
+
+soil3 <- read_excel(here("data", "Tecate_PhaseIII_Topo1m_soil.xlsx")) %>% 
+  clean_names()
+
+
+```
+
+
+```{r}
+
+View(ph1)
+View(soil1)
+
+
+join1 <- inner_join(ph1, soil1, by = "id")
+
+df1 <- join1 %>% 
+  filter(growth_2018_2019 > 0) %>% 
+  select(id, site, water_trt, germ_trt, growth_2014_2015, growth_2015_2016, growth_2016_2017, growth_2017_2018, growth_2018_2019, july_2019_shrub_cover, depth_t_rl, sand, ph, orgmat, awc, clay, elevation1m, slope1m, aspect1m, curvature)
+
+# View(df1)
+
+##
+
+join2 <- inner_join(ph2, soil2, by = "id")
+
+df2 <- join2 %>% 
+  filter(growth_2018_2019 > 0) %>% 
+  select(id, site, trt, growth_2014_2015, growth_2015_2016, growth_2016_2017, growth_2017_2018, growth_2018_2019, july_2019_shrub_cover, depth_t_rl, sand, ph, orgmat, awc, clay, elevation1m, slope1m, aspect1m, curvature)
+
+# View(df2)
+
+##
+
+join3 <- inner_join(ph3, soil3, by = "id") %>% 
+  select(id, site, growth_2018_2019, depth_t_rl, sand, ph, orgmat, awc, clay, elevation1m, slope1m, aspect1m, curvature)
+
+
+df3 <- join3 %>%
+  filter(growth_2018_2019 > 0) 
+
+# View(df3)
+
+```
+
+
+```{r}
+
+df1 <- join1 %>% 
+  filter(growth_2018_2019 > 0) %>% 
+  select(id, water_trt, growth_2018_2019, july_2019_shrub_cover, depth_t_rl, sand, ph, orgmat, awc, clay, elevation_1m, slope1m, aspect1m, curvature)
+
+df2 <- join1 %>% 
+  filter(growth_2017_2018 > 0) %>% 
+  select(id, water_trt, growth_2017_2018, depth_t_rl, sand, ph, orgmat, awc, clay, elevation_1m, slope1m, aspect1m, curvature, july_2018_shrub_cover)
+
+df3 <- join1 %>% 
+  filter(growth_2016_2017 > 0) %>% 
+  select(id, water_trt, growth_2016_2017, depth_t_rl, sand, ph, orgmat, awc, clay, elevation_1m, slope1m, aspect1m, curvature, july_2017_shrub_cover)
+
+
+# View(df1)
+# View(df2)
+# View(df3)
+
+hist(df1$elevation_1m)
+hist(df2$elevation_1m)
+hist(df3$elevation_1m)
+
+hist(df1$slope1m)
+hist(df2$slope1m)
+hist(df3$slope1m)
+
+hist(df1$aspect1m)
+hist(df2$aspect1m)
+hist(df3$aspect1m)
+
+hist(df1$curvature)
+hist(df2$curvature)
+hist(df3$curvature)
+
+hist(df1$july_2019_shrub_cover)
+hist(df2$july_2018_shrub_cover)
+hist(df3$july_2017_shrub_cover)
+
+
+```
+
+
+```{r}
+
+View(df_all)
+
+df_all$site <- as.factor(df_all$site)
+
+lm_growth <- lm(growth_2018_2019 ~ site + clay + depth_t_rl + orgmat + ph + sand, data=df_all)
+
+summary(lm1)
+
+hist(df_all$awc)
+
+```
+
+
+
+```{r}
+
+lm1 <- lm(growth_2018_2019 ~ water_trt + depth_t_rl + elevation_1m + slope1m + aspect1m + curvature + july_2019_shrub_cover, data=df1)
+lm2 <- lm(growth_2017_2018 ~ water_trt + depth_t_rl + elevation_1m + slope1m + aspect1m + curvature + july_2018_shrub_cover, data=df2)
+lm3 <- lm(growth_2016_2017 ~ water_trt + depth_t_rl + elevation_1m + slope1m + aspect1m + curvature + july_2017_shrub_cover, data=df3)
+
+
+lm1 <- lm(growth_2018_2019 ~ depth_t_rl + curvature + july_2019_shrub_cover, data=df1) 
+lm2 <- lm(growth_2017_2018 ~ elevation_1m + slope1m + curvature + july_2018_shrub_cover, data=df2) 
+lm3 <- lm(growth_2016_2017 ~ slope1m + july_2017_shrub_cover, data=df3) 
+
+summary(lm1)
+summary(lm2)
+summary(lm3)
+
+View(join3)
+
+lm3 <- lm(growth_2018_2019 ~ water_trt + depth_t_rl + elevation_1m + slope1m + aspect1m + curvature + july_2019_shrub_cover, data=df1)
+
+# orgmat same, ph same, sand, awc, clay - same for all locations
+
+```
+
+
+
+```{r}
+ph1 <- ph1 %>% 
+  select(id, site, water_trt, germ_trt, growth_2014_2015, growth_2015_2016, growth_2016_2017, growth_2017_2018, growth_2018_2019)
+
+join1 <- inner_join(ph1, soil1, by = "id")
+
+# pvt1 <- pivot_longer(join1, cols = 17:22, names_to = "year", values_to = "growth")
+pvt1 <- pivot_longer(join1, cols = 5:9, names_to = "year", values_to = "growth")
+
+pvt1$year[which(pvt1$year=="growth_2014_2015")] <- "2015"
+pvt1$year[which(pvt1$year=="growth_2015_2016")] <- "2016"
+pvt1$year[which(pvt1$year=="growth_2016_2017")] <- "2017"
+pvt1$year[which(pvt1$year=="growth_2017_2018")] <- "2018"
+pvt1$year[which(pvt1$year=="growth_2018_2019")] <- "2019"
+
+View(pvt1)
+
+pvt1$year <- as.factor(pvt1$year)
+
+pvt1 <- pvt1 %>%
+  filter(growth > 0) %>% 
+  mutate(direction, if_else(slope1m > 0, N, if_else(slope))
+
+View(pvt1)
+
+#####
+
+View(ph2)
+
+ph2 <- ph2 %>% 
+  select(id, site, trt, growth_2013_2014, growth_2014_2015, growth_2015_2016, growth_2016_2017, growth_2017_2018, growth_2018_2019)
+
+join2 <- inner_join(ph2, soil2, by = "id")
+
+View(join2)
+
+# pvt2 <- pivot_longer(join2, cols = 27:22, names_to = "year", values_to = "growth")
+pvt2 <- pivot_longer(join2, cols = 4:9, names_to = "year", values_to = "growth")
+
+pvt2$year[which(pvt1$year=="growth_2013_2014")] <- "2014"
+pvt2$year[which(pvt1$year=="growth_2014_2015")] <- "2015"
+pvt2$year[which(pvt1$year=="growth_2015_2016")] <- "2016"
+pvt2$year[which(pvt1$year=="growth_2016_2017")] <- "2017"
+pvt2$year[which(pvt1$year=="growth_2017_2018")] <- "2018"
+pvt2$year[which(pvt1$year=="growth_2018_2019")] <- "2019"
+
+View(pvt2)
+
+pvt2$year <- as.factor(pvt2$year)
+
+pvt2 <- pvt2 %>%
+  filter(growth > 0)
+
+join2 <- join2 %>%
+  filter(growth_2018_2019 > 0)
+
+
+```
+
+
+```{r}
+df1 <- join1 %>% 
+  filter(growth_2018_2019 > 0) %>% 
+  select(id, water_trt, growth_2018_2019, july_2019_shrub_cover, depth_t_rl, sand, ph, orgmat, awc, clay, elevation_1m, slope1m, aspect1m, curvature)
+
+
+
+lm1 <- lm(growth ~ year + water_trt + depth_t_rl + elevation_1m + slope1m + aspect1m + curvature, data=pvt1)
+
+summary(lm1)
+
+
+lm2 <- lm(growth ~ year + trt + depth_t_rl + elevation_1m + slope1m + aspect1m + curvature, data=pvt2)
+
+summary(lm2)
+
+```
+
+
+```{r}
+View(join1)
+
+join1$ph <- as.numeric(join1$ph)
+
+plot1 <- ggplot(join1) +
+  geom_bar(aes (x = water_trt, y=clay))
+
+plot1
+
+plot1 <- ggplot(arth_data) + 
+  geom_bar(fill='deepskyblue3', aes(x = year_restoration, detritivores), 
+           position = "dodge", stat = "summary", fun.y = "mean") +
+  theme_classic() +
+  ggtitle("Relative cover of detritivores") +
+  scale_y_continuous(expand=c(0,0))+
+  scale_x_continuous(breaks = 0:5)+
+  theme(axis.title.y = element_text(size = 10))
+```
+
+
+```{r}
+
+df1_4 <- df1 %>% 
+  filter(site=="4")
+
+df1_5 <- df1 %>% 
+  filter(site=="5")
+
+mean(df1_4$sand) # 64.37
+mean(df1_5$sand) # 67.9
+
+mean(df1_4$ph) # 6.27
+mean(df1_5$ph) # 6.20
+
+mean(df1_4$orgmat) # .835
+mean(df1_5$orgmat) # .75
+
+mean(df1_4$clay) # 14.29
+mean(df1_5$clay) # 12.5
+
+mean(df1_4$growth_2018_2019) # 7.431
+mean(df1_5$growth_2018_2019) # 6.418
+
+
+t.test(df1_4$growth_2018_2019, df1_5$growth_2018_2019) # no significant differences in growth between sites 4 and 5
+
+t.test(df1_4$growth_2018_2019, df1_5$growth_2018_2019) # no significant differences in growth between sites 4 and 5
+
+summary(df1_4)
+summary(df1_5)
+
+```
+
+```{r}
+
+View(ph2)
+
+df2_2 <- df2 %>% 
+  filter(site=="2")
+
+df2_3 <- df2 %>% 
+  filter(site=="3")
+
+
+mean(df2_2$depth_t_rl) # 49.67
+mean(df2_3$depth_t_rl) # 66.58
+
+mean(df2_2$sand) # 50.20
+mean(df2_3$sand) # 38.14
+
+mean(df2_2$ph) # 6.54
+mean(df2_3$ph) # 6.77
+
+mean(df2_2$orgmat) # 1.18
+mean(df2_3$orgmat) # 1.47
+
+mean(df2_2$awc) # .133
+mean(df2_3$awc) # .121
+
+mean(df2_2$clay) # 21.46
+mean(df2_3$clay) # 27.61
+
+mean(df2_2$growth_2018_2019) # 30.33
+mean(df2_3$growth_2018_2019) # 33.625
+
+
+t.test(df2_2$sand, df2_3$sand) # p<.001
+t.test(df2_2$ph, df2_3$ph) # p<.001
+t.test(df2_2$orgmat, df2_3$orgmat) # p<.001
+
+
+t.test(df2_2$growth_2018_2019, df2_3$growth_2018_2019) # no significant differences in growth between sites 2 and 3
+
+summary(df2_2)
+summary(df2_3)
+summary(df3)
+
+View(df3)
+
+
+```
+
+
+```{r}
+
+df1_anv <- join1 %>% 
+  filter(growth_2018_2019 > 0) %>% 
+  select(id, site, growth_2018_2019, depth_t_rl, sand, ph, orgmat, awc, clay, elevation1m, slope1m, aspect1m, curvature) %>% 
+  mutate(phase = "1")
+
+df2_anv <- join2 %>% 
+  filter(growth_2018_2019 > 0) %>% 
+  select(id, site, growth_2018_2019, depth_t_rl, sand, ph, orgmat, awc, clay, elevation1m, slope1m, aspect1m, curvature)%>% 
+  mutate(phase = "2")
+
+df3_anv <- join3 %>% 
+  filter(growth_2018_2019 > 0) %>% 
+  select(id, site, growth_2018_2019, depth_t_rl, sand, ph, orgmat, awc, clay, elevation1m, slope1m, aspect1m, curvature) %>% 
+  mutate(phase = "3")
+
+df_all <- rbind(df1_anv, df2_anv, df3_anv)
+
+
+View(df_all)
+
+table1 <- df_all %>% 
+  group_by(site) %>% 
+  summarise(mean_awc = mean(awc), mean_clay = mean(clay), mean_depth_trl = mean(depth_t_rl), mean_orgmat = mean(orgmat), mean_ph = mean(ph), mean_sand = mean(sand), )
+
+write.csv(table1, "table1.csv")
+
+table1
+
+```
+
+# new lm
+```{r}
+
+df_all$site <- as.factor(df_all$site)
+
+lm_all <- lm(growth_2018_2019 ~ site + clay + depth_t_rl + orgmat + ph + sand + elevation1m, slope1m + aspect1m + curvature, data=df_all)
+
+summary(lm_all)
+
+View(df_all)
+
+```
+
+
+```{r}
+
+plot1 <- ggplot(df_all) + 
+  geom_bar(fill='deepskyblue3', aes(x = site, awc), 
+           position = "dodge", stat = "summary", fun.y = "mean") +
+  theme_classic() +
+  ggtitle("AWC at Sites 1-6") +
+  scale_y_continuous(expand=c(0,0), breaks = seq(0:.015, by = .02))+
+  scale_x_continuous(breaks = 0:6)+
+  theme(axis.title.y = element_text(size = 10))
+
+plot2 <- ggplot(df_all) + 
+  geom_bar(fill='deepskyblue3', aes(x = site, clay), 
+           position = "dodge", stat = "summary", fun.y = "mean") +
+  theme_classic() +
+  ggtitle("Clay content at Sites 1-6") +
+  scale_y_continuous(expand=c(0,0))+
+  scale_x_continuous(breaks = 0:6)+
+  theme(axis.title.y = element_text(size = 10))
+
+plot3 <- ggplot(df_all) + 
+  geom_bar(fill='deepskyblue3', aes(x = site, depth_t_rl), 
+           position = "dodge", stat = "summary", fun.y = "mean") +
+  theme_classic() +
+  ggtitle("Depth TRL at Sites 1-6") +
+  scale_y_continuous(expand=c(0,0))+
+  scale_x_continuous(breaks = 0:6)+
+  theme(axis.title.y = element_text(size = 10))
+
+plot4 <- ggplot(df_all) + 
+  geom_bar(fill='deepskyblue3', aes(x = site, orgmat), 
+           position = "dodge", stat = "summary", fun.y = "mean") +
+  theme_classic() +
+  ggtitle("Organic Matter at Sites 1-6") +
+  scale_y_continuous(expand=c(0,0))+
+  scale_x_continuous(breaks = 0:6)+
+  theme(axis.title.y = element_text(size = 10))
+
+plot5 <- ggplot(df_all) + 
+  geom_bar(fill='deepskyblue3', aes(x = site, ph), 
+           position = "dodge", stat = "summary", fun.y = "mean") +
+  theme_classic() +
+  ggtitle("ph at Sites 1-6") +
+  scale_y_continuous(expand=c(0,0))+
+  scale_x_continuous(breaks = 0:6)+
+  theme(axis.title.y = element_text(size = 10))
+
+plot6 <- ggplot(df_all) + 
+  geom_bar(fill='deepskyblue3', aes(x = site, sand), 
+           position = "dodge", stat = "summary", fun.y = "mean") +
+  theme_classic() +
+  ggtitle("Sand at Sites 1-6") +
+  scale_y_continuous(expand=c(0,0)) +
+  scale_x_continuous(breaks = 0:6)+
+  theme(axis.title.y = element_text(size = 10))
+
+
+# ggsave("plot1.png", plot = plot1, device = "png", width = 5, height = 3, units = c("in"), dpi = 300)
+# ggsave("plot2.png", plot = plot2, device = "png", width = 5, height = 3, units = c("in"), dpi = 300)
+# ggsave("plot3.png", plot = plot3, device = "png", width = 5, height = 3, units = c("in"), dpi = 300)
+# ggsave("plot4.png", plot = plot4, device = "png", width = 5, height = 3, units = c("in"), dpi = 300)
+# ggsave("plot5.png", plot = plot5, device = "png", width = 5, height = 3, units = c("in"), dpi = 300)
+# ggsave("plot6.png", plot = plot6, device = "png", width = 5, height = 3, units = c("in"), dpi = 300)
+
+```
+
+```{r}
+
+QuantileType1 <- function (v, p) {
+ v = sort(v)
+ m = 0
+ n = length(v)
+ j = floor((n * p) + m)
+ g = (n * p) + m - j
+ y = ifelse (g == 0, 0, 1)
+ ((1 - y) * v[j]) + (y * v[j+1])
+}
+
+# Generate labels for similar groupings
+generate_label_df <- function(TUKEY, variable){
+
+  # Extract labels and factor levels from Tukey post-hoc 
+  Tukey.levels <- TUKEY[[variable]][,4]
+  Tukey.labels <- data.frame(multcompLetters(Tukey.levels)['Letters'])
+
+  #I need to put the labels in the same order as in the boxplot :
+  Tukey.labels$type=rownames(Tukey.labels)
+  Tukey.labels=Tukey.labels[order(Tukey.labels$type) , ]
+  return(Tukey.labels)
+}
+
+```
+
+
+```{r}
+
+df_all1 <- df_all %>% 
+  filter(site == 1)
+
+mean(df_all1$growth_2018_2019)
+
+library(multcompView)
+
+View(df_all_anv)
+
+df_all_anv <- df_all %>% 
+  select(site, growth_2018_2019, phase)
+
+df_all_anv$site <- as.factor(df_all_anv$site)
+df_all_anv$phase <- as.factor(df_all_anv$phase)
+
+# What is the effect of the treatment on the value
+model=lm(df_all_anv$growth_2018_2019 ~ df_all_anv$site)
+
+ANOVA=aov(model)
+ 
+# Tukey test to study each pair of treatment :
+TUKEY <- TukeyHSD(x=ANOVA, 'df_all_anv$site', conf.level=0.95)
+ 
+# Tuckey test representation :
+tky_growth <- plot(TUKEY , las=1 , col="blue")
+
+tky_growth
+
+labels1 <- generate_label_df(TUKEY, "df_all_anv$site") # generate labels using function
+
+labels1
+
+names(labels1)<-c('Letters','site')#rename columns for merging
+
+yvalue1 <- aggregate(.~site, data=df_all_anv, FUN = function(i) quantile(i, probs = 0.75, na.rm = T)) # obtain letter position for y axis using means
+
+labs_df1 <-merge(labels1,yvalue1) #merge dataframes
+
+#If necessary, reorder the items
+# labs_df1$Letters[1:4] <- c("a", "ab", "b", "b")
+
+# View(labs_df1)
+
+fun_mean <- function(x){
+  return(data.frame(y=mean(x),label=mean(x,na.rm=T)))}
+
+
+# bar graph taxa richness ~ type
+plot_anv_growth <- ggplot(df_all_anv, aes(x = site, y = growth_2018_2019)) + 
+  geom_boxplot(aes(fill=site), stat = "boxplot", fun.y = "mean") +
+  theme_classic() +
+  ggtitle("Mean growth from 2018-2019 at Sites 1-6") +
+  xlab("Site number") +
+  ylab("Growth from 2018-2019 (mm)") +
+  scale_y_continuous(expand=c(0,0)) +
+  scale_x_discrete(expand=c(0,0)) +
+  theme(plot.title = element_text(face="bold", size = 11),
+        axis.title = element_text(size=8),
+        legend.title = element_text(size=8, face="bold"),
+        legend.text = element_text(size=8))+
+  scale_fill_brewer(palette="Dark2") +
+  geom_text(data = labs_df1, aes(x = site, y = growth_2018_2019, label = Letters, vjust = -.75, hjust=-.75)) +
+  theme(plot.title = element_text(vjust=-0.6))
+
+plot_anv_growth
+
+
+plot_growth <- ggplot(df_all_anv, aes(x = site, y = growth_2018_2019, fill=phase)) + 
+  geom_bar(position = position_dodge2(width = 0.9, preserve = "single"), stat = "summary", fun.y = "mean") +
+  theme_classic() +
+  ggtitle("Mean growth from 2018-2019 at Sites 1-6") +
+  ylab("Mean growth from 2018-2019 (cm)") +
+  scale_y_continuous(expand=c(0,0)) +
+  scale_x_discrete(breaks = 0:6)+
+  theme(axis.title.y = element_text(size = 10))
+
+plot_growth
+
+ggsave("plot_growth.png", plot = plot_growth, device = "png", width = 5, height = 3, units = c("in"), dpi = 300)
+
+ggsave("plot_anv_growth.png", plot = plot_anv_growth, device = "png", width = 5, height = 3, units = c("in"), dpi = 300)
+
+```
+
+
